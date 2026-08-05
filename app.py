@@ -876,43 +876,41 @@ st.sidebar.markdown(
 )
 st.sidebar.title("Sound Life Cohort")
 st.sidebar.caption("Bayesian-network foundation model — results dashboard")
-page = st.sidebar.radio(
-    "Navigate",
-    ["Overview", "Network Explorer", "Diagnostics", "CV vs Bootstrap",
-     "Model Comparison", "Validation", "About / Methods"],
-)
 
-MODEL_PAGES = {"Overview", "Network Explorer", "Diagnostics"}
-if page in MODEL_PAGES:
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("#### Modeling approach")
-    model_label = st.sidebar.radio(
-        "Which validated network to explore",
-        [MODELS[m]["label"] for m in MODEL_ORDER],
-        help=(
-            "Cross-validation (CV): k-fold cross-validated structure "
-            "learning, averaged network at an algorithm-chosen optimal "
-            "threshold. Bootstrap: bootstrap-resampled structure learning, "
-            "averaged network at a conservative arc-strength threshold. "
-            "Same layers, same candidate node/arc sets, two different "
-            "validation strategies — see 'CV vs Bootstrap' for a direct "
-            "comparison."
-        ),
-    )
-    model = "cv" if model_label == MODELS["cv"]["label"] else "bootstrap"
-else:
-    model = "cv"
+st.sidebar.markdown("---")
+st.sidebar.markdown("#### Modeling approach")
+model_label = st.sidebar.radio(
+    "Which validated network to explore",
+    [MODELS[m]["label"] for m in MODEL_ORDER],
+    help=(
+        "Cross-validation (CV): k-fold cross-validated structure "
+        "learning, averaged network at an algorithm-chosen optimal "
+        "threshold. Bootstrap: bootstrap-resampled structure learning, "
+        "averaged network at a conservative arc-strength threshold. "
+        "Same layers, same candidate node/arc sets, two different "
+        "validation strategies — see 'CV vs Bootstrap' for a direct "
+        "comparison. Applies to the Overview, Network Explorer, and "
+        "Diagnostics tabs; CV vs Bootstrap and Validation show both "
+        "side by side regardless of this setting."
+    ),
+)
+model = "cv" if model_label == MODELS["cv"]["label"] else "bootstrap"
 
 st.sidebar.markdown("---")
 st.sidebar.markdown(
     "[Sound Life raw-data dashboard ↗](https://soundlife-dashboard-ik8gg8mk5yrfogaeveepzh.streamlit.app/)"
 )
 
+tab_overview, tab_explorer, tab_diag, tab_cvb, tab_modelcomp, tab_val, tab_about = st.tabs(
+    ["Overview", "Network Explorer", "Diagnostics", "CV vs Bootstrap",
+     "Model Comparison", "Validation", "About / Methods"]
+)
+
 
 # --------------------------------------------------------------------------
 # OVERVIEW
 # --------------------------------------------------------------------------
-if page == "Overview":
+with tab_overview:
     st.markdown('<div class="eyebrow">STRUCTURE LEARNING · MULTI-OMICS</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="hero-title">A Bayesian-Network Foundation Model<br>for the Sound Life Cohort</div>',
@@ -994,28 +992,20 @@ if page == "Overview":
    hypothesis generation, not merely a fitted object with no inferential use.
 """
     )
-    st.info(
-        "Use **Network Explorer** in the sidebar to interactively browse, "
-        "filter, and query any of the nine learned networks below, "
-        "**CV vs Bootstrap** to see exactly where the two validation "
-        "approaches agree and disagree, or **Validation** to see how well "
-        "each network holds up against held-out flu outcomes and the "
-        "published literature.",
-        icon="🕸️",
-    )
 
 
 # --------------------------------------------------------------------------
 # NETWORK EXPLORER
 # --------------------------------------------------------------------------
-elif page == "Network Explorer":
+with tab_explorer:
     st.markdown('<div class="eyebrow">INTERACTIVE GRAPH</div>', unsafe_allow_html=True)
     st.title("Network Explorer")
 
-    layer_key = st.sidebar.selectbox(
+    layer_key = st.selectbox(
         "Layer",
         LAYER_ORDER,
         format_func=lambda k: LAYER_META[k]["label"],
+        key="ne_layer",
     )
     meta = LAYER_META[layer_key]
     st.markdown(
@@ -1028,17 +1018,24 @@ elif page == "Network Explorer":
     section_label(f"Findings for {layer_key} ({MODELS[model]['short']})")
     render_cards(layer_findings(layer_key, model), kind="finding")
 
-    st.sidebar.markdown("#### Filters")
-    final_only = st.sidebar.checkbox(
-        "Show official averaged final DAG only",
-        value=True,
-        help=(
-            "When checked, shows exactly the edges retained in this "
-            f"model's averaged network at its threshold "
-            "(in_final_dag = TRUE). Uncheck to explore the full "
-            "arc-strength table at a threshold you choose."
-        ),
-    )
+    st.markdown("#### Filters & display")
+    ctrl1, ctrl2, ctrl3 = st.columns(3)
+    with ctrl1:
+        final_only = st.checkbox(
+            "Show official averaged final DAG only",
+            value=True,
+            key="ne_final_only",
+            help=(
+                "When checked, shows exactly the edges retained in this "
+                f"model's averaged network at its threshold "
+                "(in_final_dag = TRUE). Uncheck to explore the full "
+                "arc-strength table at a threshold you choose."
+            ),
+        )
+    with ctrl2:
+        physics_on = st.checkbox("Physics simulation", value=True, key="ne_physics")
+    with ctrl3:
+        hierarchical = st.checkbox("Hierarchical layout", value=False, key="ne_hierarchical")
 
     full_df = load_edges(layer_key, model)
     max_display = 500
@@ -1047,24 +1044,21 @@ elif page == "Network Explorer":
         show_df = final_dag_edges(layer_key, model)
         threshold_note = "official averaged-network threshold"
     else:
-        threshold = st.sidebar.slider(
+        threshold = st.slider(
             "Minimum arc strength (bootstrap support)",
             0.0, 1.0, 0.5, 0.01,
+            key="ne_threshold",
         )
         dedup = deduped_directed_edges(layer_key, model)
         show_df = dedup[dedup["strength"] >= threshold]
         threshold_note = f"strength ≥ {threshold:.2f}"
         if len(show_df) > max_display:
-            st.sidebar.warning(
+            st.warning(
                 f"{len(show_df):,} candidate arcs meet this threshold — "
                 f"showing the top {max_display} by strength for "
                 "renderability. Raise the threshold to narrow this down."
             )
             show_df = show_df.head(max_display)
-
-    st.sidebar.markdown("#### Display")
-    physics_on = st.sidebar.checkbox("Physics simulation", value=True)
-    hierarchical = st.sidebar.checkbox("Hierarchical layout", value=False)
 
     nodes_in_view = sorted(set(show_df["from"]) | set(show_df["to"]))
     st.markdown('<hr class="hr-line">', unsafe_allow_html=True)
@@ -1192,11 +1186,11 @@ elif page == "Network Explorer":
 # --------------------------------------------------------------------------
 # DIAGNOSTICS
 # --------------------------------------------------------------------------
-elif page == "Diagnostics":
+with tab_diag:
     st.markdown('<div class="eyebrow">MODEL FIT & STABILITY</div>', unsafe_allow_html=True)
     st.title("Diagnostics")
-    layer_key = st.sidebar.selectbox(
-        "Layer", LAYER_ORDER, format_func=lambda k: LAYER_META[k]["label"]
+    layer_key = st.selectbox(
+        "Layer", LAYER_ORDER, format_func=lambda k: LAYER_META[k]["label"], key="diag_layer"
     )
 
     st.markdown(
@@ -1282,7 +1276,7 @@ elif page == "Diagnostics":
 # --------------------------------------------------------------------------
 # CV VS BOOTSTRAP
 # --------------------------------------------------------------------------
-elif page == "CV vs Bootstrap":
+with tab_cvb:
     st.markdown('<div class="eyebrow">TWO VALIDATION STRATEGIES · SAME LAYERS</div>', unsafe_allow_html=True)
     st.title("CV vs Bootstrap")
     st.markdown(
@@ -1459,15 +1453,14 @@ elif page == "CV vs Bootstrap":
 # --------------------------------------------------------------------------
 # MODEL COMPARISON
 # --------------------------------------------------------------------------
-elif page == "Model Comparison":
+with tab_modelcomp:
     st.markdown('<div class="eyebrow">ALGORITHM BENCHMARK</div>', unsafe_allow_html=True)
     st.title("Model Comparison")
-    st.info(
-        "This page benchmarks structure-learning **algorithms** (hill-climbing, "
-        "tabu search, MM-HC) within the CV pipeline. For a head-to-head "
-        "comparison of the **CV vs Bootstrap validation strategies**, see "
-        "**CV vs Bootstrap** in the sidebar.",
-        icon="ℹ️",
+    st.caption(
+        "Benchmarks structure-learning algorithms (hill-climbing, tabu "
+        "search, MM-HC) within the CV pipeline. For a head-to-head "
+        "comparison of the CV vs Bootstrap validation strategies, see "
+        "the CV vs Bootstrap tab."
     )
     comp = load_model_comparison()
 
@@ -1536,7 +1529,7 @@ elif page == "Model Comparison":
 # --------------------------------------------------------------------------
 # VALIDATION  (new — held-out benchmark + literature corroboration)
 # --------------------------------------------------------------------------
-elif page == "Validation":
+with tab_val:
     st.markdown('<div class="eyebrow">DOES THE LEARNED STRUCTURE REFLECT REAL BIOLOGY?</div>', unsafe_allow_html=True)
     st.title("Validation")
     st.markdown(
@@ -1710,9 +1703,7 @@ elif page == "Validation":
 # --------------------------------------------------------------------------
 # ABOUT / METHODS
 # --------------------------------------------------------------------------
-else:
-    st.markdown('<div class="eyebrow">METHODOLOGY</div>', unsafe_allow_html=True)
-    st.title("About this project")
+with tab_about:
     st.markdown(
         """
 ### Purpose
@@ -1759,8 +1750,8 @@ validation strategies**, from the identical candidate node/arc set:
   recall for extra stability.
 
 Continuous nodes are evaluated under a conditional linear Gaussian (CLG)
-representation against a fully discretized alternative. See **CV vs
-Bootstrap** in the sidebar for a layer-by-layer comparison of where the
+representation against a fully discretized alternative. See the **CV vs
+Bootstrap** tab for a layer-by-layer comparison of where the
 two strategies agree and disagree on structure.
 
 ### Evaluation

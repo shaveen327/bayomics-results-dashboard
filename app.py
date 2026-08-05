@@ -1801,5 +1801,6 @@ page:
 ### Links
 
 - [Sound Life raw-data exploration dashboard](https://soundlife-dashboard-ik8gg8mk5yrfogaeveepzh.streamlit.app/)
+- [Full Github Repo](https://github.com/annajli/bayomics)
 """
     )

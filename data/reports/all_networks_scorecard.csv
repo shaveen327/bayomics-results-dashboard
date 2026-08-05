@@ -1,0 +1,19 @@
+network,source,label,n_subjects,n_root_edges,n_flu_relevant,agree_all,agree_relevant,wvote_age,wvote_sex,wvote_cmv
+L1a,bootstrap,Clinical (full),81,9,1,0.444,1,0.87,-0.807,NA
+L1b,bootstrap,Clinical (curated),87,7,1,0.571,1,0.909,-0.599,NA
+L2,bootstrap,Olink (plasma protein),88,9,0,0.389,NA,0.735,-0.91,1
+L3a,bootstrap,Clinical(full)+Olink,81,16,1,0.312,1,0.624,-0.838,0.987
+L3b,bootstrap,Clinical(curated)+Olink,87,11,1,0.409,1,0.793,-0.909,1
+L4,bootstrap,Whole-blood pathways,86,1,0,0.5,NA,NA,-0.844,NA
+L5,bootstrap,Immune cell frequency,88,7,1,0.786,1,0.971,1,0.277
+L6,bootstrap,Pseudobulk signaling,77,2,2,1,1,1,NA,NA
+L_all,bootstrap,Joint (all modalities),75,8,3,0.438,0.667,0.978,-0.996,0.539
+L1a,cv,Clinical (full),81,11,1,0.5,1,0.883,-0.779,NA
+L1b,cv,Clinical (curated),87,6,1,0.583,1,0.874,-0.891,NA
+L2,cv,Olink (plasma protein),88,7,0,0.357,NA,0.784,-0.905,NA
+L3a,cv,Clinical(full)+Olink,81,15,1,0.367,1,0.74,-0.812,NA
+L3b,cv,Clinical(curated)+Olink,87,11,1,0.455,1,0.798,-0.907,NA
+L4,cv,Whole-blood pathways,86,1,0,0.5,NA,NA,-0.844,NA
+L5,cv,Immune cell frequency,88,9,1,0.778,1,0.98,1,0.038
+L6,cv,Pseudobulk signaling,77,3,1,0.833,1,1,NA,-0.558
+L_all,cv,Joint (all modalities),75,18,8,0.556,0.778,0.979,-0.97,0.743

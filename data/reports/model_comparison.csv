@@ -1,0 +1,7 @@
+network,n_nodes,edges_hc,edges_tabu,edges_mmhc,edges_avg_opt,edges_avg_conservative,edges_avg_50,cv_loss_mean,cv_loss_sd,bic_tabu
+L1a_clinical_full,37,80,80,29,67,55,67,85.115,5.679,-6485.185
+L1b_clinical_curated,25,49,49,15,40,29,40,58.867,2.781,-4955.628
+L2_olink,37,89,91,36,66,60,66,32.39,6.376,-2368.156
+L4_wb_pathways,53,139,139,46,98,89,98,-131.693,3.633,11738.645
+L5_freq_immunophenotype,91,428,431,90,297,130,297,61.211,15.91,-3637.731
+L6_pb_signaling,147,719,721,141,349,145,349,-83.477,15.445,10238.347

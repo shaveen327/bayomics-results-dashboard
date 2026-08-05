@@ -3,3 +3,4 @@ pandas>=2.0
 plotly>=5.18
 streamlit-agraph>=0.0.45
 starlette<1.0
+matplotlib

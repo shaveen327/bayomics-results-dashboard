@@ -899,6 +899,7 @@ model = "cv" if model_label == MODELS["cv"]["label"] else "bootstrap"
 st.sidebar.markdown("---")
 st.sidebar.markdown(
     "[Sound Life raw-data dashboard ↗](https://soundlife-dashboard-ik8gg8mk5yrfogaeveepzh.streamlit.app/)"
+    "[Full Github Repo](https://github.com/annajli/bayomics)"
 )
 
 tab_overview, tab_explorer, tab_diag, tab_cvb, tab_modelcomp, tab_val, tab_about = st.tabs(
